@@ -4,7 +4,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Keyboard } from 'react-native'
+  Keyboard,
+  Vibration,
+  Pressable } from 'react-native'
 import ResultImc from './result-imc';
 import styles from './style';
 
@@ -14,6 +16,14 @@ export default function Form(){
   const [messageImc, setMessageImc] = useState("preencha o peso e altura")
   const [imc, setImc] = useState(null)
   const [textButton, setTextButton] = useState("Calcular")
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  function verificationImc() {
+    if (imc == null) {
+      Vibration.vibrate()
+      setErrorMessage('campo obrigatório*')
+    }
+  }
 
   function formatterToNumber(string) {
     return Number(string.replace(',', '.'))
@@ -26,23 +36,25 @@ export default function Form(){
   }
 
   function validationImc() {
-    Keyboard.dismiss()
     if (weight != null && height != null) {
       imcCalculator()
       setHeight(null)
       setWeight(null)
       setMessageImc("Seu imc é igual:")
       setTextButton("Calcular novamente")
+      setErrorMessage(null)
       return
     }
     setImc(null)
+    verificationImc()
     setTextButton("Calcular")
     setMessageImc("preencha o peso e altura")
   }
   return(
-    <View style={styles.formContext}>
+    <Pressable onPress={ Keyboard.dismiss } style={styles.formContext}>
       <View style={styles.form}>
         <Text style={styles.formLabel}>Altura</Text>
+        <Text style={styles.errorMessage}>{errorMessage}</Text>
         <TextInput
           style={styles.input}
           onChangeText={setHeight}
@@ -51,6 +63,7 @@ export default function Form(){
           keyboardType="numeric" />
 
         <Text style={styles.formLabel}>Peso</Text>
+        <Text style={styles.errorMessage}>{errorMessage}</Text>
         <TextInput
           style={styles.input}
           onChangeText={setWeight}
@@ -69,6 +82,6 @@ export default function Form(){
       <ResultImc
         messageResultImc={messageImc}
         resultImc={imc} />
-    </View>
+    </Pressable>
   );
 }
